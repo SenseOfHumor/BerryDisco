@@ -1,6 +1,6 @@
 import streamlit as st
 from db import create_event, get_songs, add_song_to_event, get_event_name, container  # Import functions from db.py
-from youtube import search_youtube
+#from youtube import search_youtube
 #from player import player
 
 # Set up initial states
@@ -90,19 +90,19 @@ if code and len(code) == 6:  # Ensure the code is exactly 6 digits
                 st.warning("Please enter a valid song name.")
 
         # turning the songs into an array of names
-        music_array = []
-        link_array = []
-        for song in st.session_state["songs"]:
-            music_array.append(song)
-        #st.write(music_array)
-        print(music_array)
+        # music_array = []
+        # link_array = []
+        # for song in st.session_state["songs"]:
+        #     music_array.append(song)
+        # #st.write(music_array)
+        # print(music_array)
 
 
-        ## creating a new array of youtube links
-        for track in music_array:
-            link=search_youtube(track)
-            link_array.append(link)
-        st.write(link_array)
+        # ## creating a new array of youtube links
+        # for track in music_array:
+        #     link=search_youtube(track)
+        #     link_array.append(link)
+        # st.write(link_array)
         
         # Display the player
         #player(link_array)
