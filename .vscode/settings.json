@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/999eb677-c9ba-4dac-b065-11fcdcd801d1/resourceGroups/GIRLHACKS/providers/Microsoft.Web/sites/DiscoHost",
+    "appService.deploySubpath": "."
+}
