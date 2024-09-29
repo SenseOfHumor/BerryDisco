@@ -1,14 +1,6 @@
 import streamlit as st
 
-
-def player(video_urls):
-    # List of YouTube video URLs
-    # video_urls = [
-    #     "https://www.youtube.com/watch?v=3AtDnEC4zak",  # Ed Sheeran - Shape of You
-    #     "https://www.youtube.com/watch?v=p-BnzNKPSYc",  # Avicii - Wake Me Up
-    #     "https://www.youtube.com/watch?v=h5EofwRzit0"   # Daft Punk - Get Lucky
-    # ]
-
+def player(songs):
     # Initialize session state to keep track of the current video index
     if 'video_index' not in st.session_state:
         st.session_state.video_index = 0
@@ -22,18 +14,23 @@ def player(video_urls):
 
     with col2:
         if st.button("Next"):
-            if st.session_state.video_index < len(video_urls) - 1:
+            if st.session_state.video_index < len(songs) - 1:
                 st.session_state.video_index += 1
 
     # Get the updated current video index
     current_index = st.session_state.video_index
 
-    # Display the current video
-    st.video(video_urls[current_index])
+    # Display the current song name
+    st.write(f"Now playing: {songs[current_index]}")
+
+    # Assuming the song names are valid YouTube URLs
+    st.video(songs[current_index])
 
 
+# Example usage (when you get the songs list from your Cosmos DB)
 # music_array = ["https://www.youtube.com/watch?v=3AtDnEC4zak",
 #                "https://www.youtube.com/watch?v=p-BnzNKPSYc",
 #                "https://www.youtube.com/watch?v=h5EofwRzit0",
 #                "https://www.youtube.com/watch?v=62i7zHtmsTA"]
-# player (music_array)
+
+# player(music_array)

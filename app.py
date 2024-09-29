@@ -1,6 +1,7 @@
 import streamlit as st
 from db import create_event, get_songs, add_song_to_event, get_event_name, container  # Import functions from db.py
 
+
 # Set up initial states
 if "event_id" not in st.session_state:
     st.session_state["event_id"] = None
@@ -10,6 +11,12 @@ if "event_name" not in st.session_state:
 
 if "songs" not in st.session_state:
     st.session_state["songs"] = []
+
+if "song_pointer" not in st.session_state:
+    st.session_state.song_pointer = 0  # Pointer to track which song is currently playing
+
+if 'youtube_links' not in st.session_state:
+    st.session_state['youtube_links'] = {}  # To cache fetched YouTube links for songs
 
 #######################################################################
 ## EVERYTHING RELATED TO THE SIDEBAR GOES HERE ##
@@ -70,7 +77,7 @@ if code and len(code) == 6:  # Ensure the code is exactly 6 digits
         st.toast("Code accepted! 🎉")
         st.info(f"You have joined the Disco: {event_name} 🍇🕺🏽")
 
-        # Text input to add new songs to the event
+        # Adding song text input
         new_song = st.text_input("Add a song to the Disco")
         if st.button("Add Song"):
             if new_song:
@@ -80,6 +87,4 @@ if code and len(code) == 6:  # Ensure the code is exactly 6 digits
                 st.success(f"Added song: {new_song} to {event_name}")
             else:
                 st.warning("Please enter a valid song name.")
-    else:
-        st.error("Invalid event code. Please try again.")
 

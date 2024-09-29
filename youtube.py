@@ -1,28 +1,26 @@
 import os
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
-import json
 
-def get_music_youtube_urls_from_list(music_list):
+# Load the API key from the .env file
+load_dotenv()
+api_key = os.getenv("YOUTUBE_API_KEY")  # Store your YouTube API key in a .env file
+
+# Initialize the YouTube API client
+youtube = build("youtube", "v3", developerKey=api_key)
+
+def search_youtube(song_name):
     """
-    This function takes a list of music names and fetches their corresponding YouTube URLs using the YouTube API.
+    This function takes a song name and fetches its corresponding YouTube URL using the YouTube API.
     
     Parameters:
-        music_list (list): A list of dictionaries where each dictionary contains the song name in 'music_name'.
+        song_name (str): The name of the song to search for on YouTube.
         
     Returns:
-        str: JSON formatted string with 'youtube_url' key added for each song.
+        str: The YouTube URL of the song or an error message.
     """
-
-    # Load API key from .env file
-    load_dotenv()
-    api_key = os.getenv("YOUTUBE_API_KEY")  # Store your YouTube API key in a .env file
-
-    # YouTube API client
-    youtube = build("youtube", "v3", developerKey=api_key)
-
-    # Function to search for a song on YouTube and return the first video URL
-    def search_youtube(song_name):
+    try:
         # Call the YouTube API to search for the song
         request = youtube.search().list(
             part="snippet",
@@ -38,13 +36,30 @@ def get_music_youtube_urls_from_list(music_list):
             video_url = f"https://www.youtube.com/watch?v={video_id}"
             return video_url
         else:
-            return None  # No results found
+            return "No results found for the song."
+    
+    except HttpError as e:
+        if e.resp.status == 403 and "quotaExceeded" in str(e):
+            return "Error: Quota exceeded for YouTube API."
+        return f"Error occurred: {e}"
 
-    # Loop through each song in the music list and get its YouTube URL
-    for song in music_list:
-        song_name = song['music_name']
+def main():
+    """
+    Main function to handle user input and display the YouTube URL.
+    """
+    while True:
+        # Get the song name from the user
+        song_name = input("Enter the name of the song (or type 'exit' to quit): ")
+
+        if song_name.lower() == 'exit':
+            print("Exiting the program.")
+            break
+
+        # Search for the song on YouTube
         youtube_url = search_youtube(song_name)
-        song['youtube_url'] = youtube_url  # Add the YouTube URL to the song data
 
-    # Return the updated music list in JSON format
-    return json.dumps(music_list, indent=4)
+        # Print the result
+        print(f"Link: {youtube_url}\n")
+
+if __name__ == "__main__":
+    main()
