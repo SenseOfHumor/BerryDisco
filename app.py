@@ -100,13 +100,10 @@ if code and len(code) == 6:  # Ensure the code is exactly 6 digits
                     st.error(f"Error fetching YouTube link for {song}: {str(e)}")
                     continue
         
-        # Display the song links
-        st.write("Songs and their YouTube links:")
-        for song, link in st.session_state['song_links'].items():
-            st.write(f"{song}: {link}")
-        
-        # Prepare the list of YouTube links for the player
-        link_array = list(st.session_state['song_links'].values())
 
-        # Display the player with the YouTube links
-        player(link_array)
+        
+        # # Prepare the list of YouTube links for the player
+        # link_array = list(st.session_state['song_links'].values())
+
+        # # Display the player with the YouTube links
+        # player(link_array)
