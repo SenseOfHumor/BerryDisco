@@ -16,8 +16,8 @@ if "songs" not in st.session_state:
 if "song_pointer" not in st.session_state:
     st.session_state.song_pointer = 0  # Pointer to track which song is currently playing
 
-if 'youtube_links' not in st.session_state:
-    st.session_state['youtube_links'] = {}  # To cache fetched YouTube links for songs
+if 'song_links' not in st.session_state:
+    st.session_state['song_links'] = {}  # Dictionary to store songs and their YouTube links
 
 #######################################################################
 ## EVERYTHING RELATED TO THE SIDEBAR GOES HERE ##
@@ -89,28 +89,24 @@ if code and len(code) == 6:  # Ensure the code is exactly 6 digits
             else:
                 st.warning("Please enter a valid song name.")
 
-        # turning the songs into an array of names
-        music_array = []
-        link_array = []
+        ## Create a dictionary that stores the song names and their corresponding YouTube links
         for song in st.session_state["songs"]:
-            music_array.append(song)
-        #st.write(music_array)
-        print(music_array)
-
-
-        ## creating a new array of youtube links
-        for track in music_array:
-            link=search_youtube(track)
-            link_array.append(link)
-        st.write(link_array)
+            if song not in st.session_state['song_links']:
+                # Fetch the YouTube link for the song if not already cached
+                try:
+                    link = search_youtube(song)
+                    st.session_state['song_links'][song] = link  # Cache the link in session state
+                except Exception as e:
+                    st.error(f"Error fetching YouTube link for {song}: {str(e)}")
+                    continue
         
-        #Display the player
+        # Display the song links
+        st.write("Songs and their YouTube links:")
+        for song, link in st.session_state['song_links'].items():
+            st.write(f"{song}: {link}")
+        
+        # Prepare the list of YouTube links for the player
+        link_array = list(st.session_state['song_links'].values())
+
+        # Display the player with the YouTube links
         player(link_array)
-                
-
-
-
-        
-            
-
-
