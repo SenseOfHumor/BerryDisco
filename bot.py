@@ -1,35 +1,29 @@
-import streamlit as st
-
-import streamlit as st
-from streamlit_calendar import calendar
-from openai import OpenAI
-from ics import Calendar, Event
-from dotenv import load_dotenv
 import os
 import json
-from datetime import datetime, timedelta
-import pytz
+from openai import OpenAI
+from dotenv import load_dotenv
+from datetime import datetime
+from youtube import get_music_youtube_urls_from_list  # Import your YouTube function
 
-from googleapiclient.discovery import build
+def get_music_recommendations(theme_input):
+    """
+    This function takes a party theme as input and returns a list of recommended songs with their corresponding YouTube URLs.
 
-from youtube import get_music_youtube_urls_from_list
+    Parameters:
+        theme_input (str): The theme of the party entered by the user.
 
+    Returns:
+        str: A JSON formatted string containing the music recommendations and YouTube URLs.
+    """
 
+    # Load API key from .env file
+    load_dotenv()
+    api_key = os.getenv("OPEN_AI_API")
 
+    # Instantiate the OpenAI client
+    client = OpenAI(api_key=api_key)
 
-# Load API key from .env file
-load_dotenv()
-api_key = os.getenv("OPEN_AI_API")
-
-# Instantiate the OpenAI client
-client = OpenAI(api_key=api_key)
-
-# AI-Powered Scheduling
-theme_input = st.text_area("Enter the theme of the party and I will suggest music based on the theme.")
-
-if st.button("GROOVE"):
-    current_date = datetime.now().strftime("%Y-%m-%d")
-
+    # AI-powered music recommendation based on the theme_input
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[
@@ -40,7 +34,7 @@ if st.button("GROOVE"):
                 This is the hackathon theme: {theme_input}
 
                 Consider the following:
-                - If the user enteres the theme of the party, the assistant should suggest 10 music based on the theme.
+                - If the user enters the theme of the party, the assistant should suggest 10 music based on the theme.
                 - Suggestions should be newer music.
                 - The assistant should suggest music that is popular and well-liked by the majority of people.
                 - The assistant should provide a variety of music genres to cater to different preferences.
@@ -60,20 +54,16 @@ if st.button("GROOVE"):
         ]
     )
 
+    # Extract and process the response from OpenAI
     response_text = response.choices[0].message.content.strip()
 
     try:
         music_list = json.loads(response_text)
     except json.JSONDecodeError:
-        st.error("Failed to decode response as JSON. Here is the raw output:")
-        st.text(response_text)
-        st.stop()
-        
-    # st.write(music_list)
+        return f"Failed to decode response as JSON. Raw output: {response_text}"
 
-
-    # Get the YouTube URLs for the music
+    # Get the YouTube URLs for the recommended music
     youtube_urls_json = get_music_youtube_urls_from_list(music_list)
-    st.write(youtube_urls_json)
 
-
+    # Return the result as a JSON string
+    return youtube_urls_json
