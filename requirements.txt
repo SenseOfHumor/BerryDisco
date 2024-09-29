@@ -3,3 +3,6 @@ google-api-python-client
 python-dotenv
 openai
 jsonschema
+azure-cosmos
+configparser
+config

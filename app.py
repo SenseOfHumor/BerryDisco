@@ -1,103 +1,85 @@
 import streamlit as st
-import os
+from db import create_event, get_songs, add_song_to_event, get_event_name, container  # Import functions from db.py
 
-# Function to save song request to a text file
-def save_song_request(song):
-    file_path = "song_requests.txt"
-    
-    # If the file doesn't exist, create it
-    if not os.path.exists(file_path):
-        with open(file_path, "w") as file:
-            file.write("[]")  # Write an empty array format
-    
-    # Load the existing list of songs from the file
-    with open(file_path, "r") as file:
-        content = file.read().strip()
-        if content:
-            songs = eval(content)  # Use eval to load the array format from text
-        else:
-            songs = []
-    
-    # Append the new song to the list
-    songs.append(song)
-    
-    # Save the updated list back to the file
-    with open(file_path, "w") as file:
-        file.write(str(songs))
+# Set up initial states
+if "event_id" not in st.session_state:
+    st.session_state["event_id"] = None
 
-# Function to read and return the playlist from the text file
-def get_playlist():
-    file_path = "song_requests.txt"
-    
-    # If the file doesn't exist or is empty, return an empty list
-    if not os.path.exists(file_path):
-        return []
-    
-    with open(file_path, "r") as file:
-        content = file.read().strip()
-        if content:
-            return eval(content)  # Use eval to interpret the array from the text
-        else:
-            return []
+if "event_name" not in st.session_state:
+    st.session_state["event_name"] = None
+
+if "songs" not in st.session_state:
+    st.session_state["songs"] = []
 
 #######################################################################
 ## EVERYTHING RELATED TO THE SIDEBAR GOES HERE ##
 #######################################################################
-
-# Title for the sidebar
 st.sidebar.title("THE PLAYLIST 🎶")
 
-# Initialize session state for theme_input and music recommendation in the sidebar
-if "theme_input" not in st.session_state:
-    st.session_state.theme_input = ""
-
-if "music_recommendation" not in st.session_state:
-    st.session_state.music_recommendation = ""
-
-# Input and button in the sidebar
-theme_input = st.sidebar.text_input("Enter your theme here", st.session_state.theme_input)
-
-if st.sidebar.button("Submit"):
-    st.session_state.theme_input = theme_input  # Store the input in session state
-
-# Button to show the playlist in the sidebar
-if st.sidebar.button("Show Playlist"):
-    playlist = get_playlist()
-    if playlist:
-        st.sidebar.subheader("Current Playlist:")
-        for song in playlist:
+# Show the list of songs for the event in the sidebar
+if st.session_state["event_id"]:
+    st.sidebar.subheader(f"Songs for {st.session_state['event_name']}:")
+    if st.session_state["songs"]:
+        for song in st.session_state["songs"]:
             st.sidebar.write(f"- {song}")
     else:
-        st.sidebar.write("No songs in the playlist yet.")
+        st.sidebar.write("No songs added yet.")
 
 #######################################################################
 ## EVERYTHING RELATED TO THE MAIN PAGE GOES HERE ##
 #######################################################################
-
-# Title for the main page
 st.title("BERRY DISCO 🍇🕺🏽")
 st.info("Welcome to Berry (Very) Disco! 🍇🕺🏽")
 
-# Main page: Enter your NJIT ID
-st.subheader("Enter your NJIT ID to join the Disco!")
+st.subheader("Create your own disco")
 
-njit_id_input = st.text_input("Enter your NJIT ID:")
+# Text input field for event name
+event_name = st.text_input("Enter the event name:", "Berry Disco")
 
-if njit_id_input:
-    # Check if the input contains "njit.edu"
-    if "njit.edu" in njit_id_input:
-        # Update the page title
-        st.title("Welcome to the event 🎉")
+# Button to create a new disco (event)
+if st.button("Create Disco!"):
+    # Call the create_event function from db.py to create a new event
+    event_id = create_event(container, event_name)  # Assuming container is set up in db.py
+
+    # Save the event_id and event_name in session state
+    st.session_state["event_id"] = event_id
+    st.session_state["event_name"] = event_name
+    
+    # Retrieve the songs for this event and update the session state
+    st.session_state["songs"] = get_songs(container, event_id)
+    
+    # Display the event ID and name
+    st.success(f"Disco created! 🎉 Event ID: {event_id}")
+    st.info(f"You are now the DJ of '{event_name}'! 🎧🎶")
+    st.caption(f"Here is your event ID: {event_id}. Share this with your friends to join the Disco!")
+
+st.subheader("Enter your 6-digit code to join the Disco!")
+code = st.text_input("Code:")
+
+if code and len(code) == 6:  # Ensure the code is exactly 6 digits
+    # Fetch the event name by the provided code (event_id)
+    event_name = get_event_name(container, code)
+    
+    if event_name:
+        st.session_state["event_id"] = code
+        st.session_state["event_name"] = event_name
         
-        # Allow the user to add music to the playlist
-        song_request = st.text_input("Request a song to add to the playlist:")
+        # Retrieve the existing songs for this event
+        st.session_state["songs"] = get_songs(container, code)
         
+        st.toast("Code accepted! 🎉")
+        st.info(f"You have joined the Disco: {event_name} 🍇🕺🏽")
+
+        # Text input to add new songs to the event
+        new_song = st.text_input("Add a song to the Disco")
         if st.button("Add Song"):
-            if song_request:
-                save_song_request(song_request)
-                st.success(f"'{song_request}' has been added to the playlist! 🎶")
+            if new_song:
+                # Add the new song to the event
+                add_song_to_event(container, code, new_song)
+                st.session_state["songs"].append(new_song)  # Update session state with the new song
+                st.success(f"Added song: {new_song} to {event_name}")
             else:
-                st.warning("Please enter a song to add.")
+                st.warning("Please enter a valid song name.")
     else:
-        st.error("Invalid NJIT ID. Please use a valid NJIT email ID (e.g., yourname@njit.edu).")
+        st.error("Invalid event code. Please try again.")
 
