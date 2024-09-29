@@ -12,6 +12,8 @@ import pytz
 
 from googleapiclient.discovery import build
 
+from youtube import get_music_youtube_urls_from_list
+
 
 
 
@@ -67,4 +69,11 @@ if st.button("GROOVE"):
         st.text(response_text)
         st.stop()
         
-    st.write(music_list)
+    # st.write(music_list)
+
+
+    # Get the YouTube URLs for the music
+    youtube_urls_json = get_music_youtube_urls_from_list(music_list)
+    st.write(youtube_urls_json)
+
+
