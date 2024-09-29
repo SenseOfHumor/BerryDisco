@@ -1,7 +1,7 @@
 import streamlit as st
 from db import create_event, get_songs, add_song_to_event, get_event_name, container  # Import functions from db.py
 from youtube import search_youtube
-from player import player
+#from player import player
 
 # Set up initial states
 if "event_id" not in st.session_state:
@@ -105,7 +105,7 @@ if code and len(code) == 6:  # Ensure the code is exactly 6 digits
         st.write(link_array)
         
         # Display the player
-        player(link_array)
+        #player(link_array)
 
 
         
