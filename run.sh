@@ -1,1 +1,1 @@
-streamlit run ui/host.py --server.port 8000 --server.address 0.0.0.0
+streamlit run host.py --server.port 8000 --server.address 0.0.0.0
