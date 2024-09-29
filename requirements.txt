@@ -3,4 +3,3 @@ google-api-python-client
 python-dotenv
 openai
 jsonschema
-googleapiclient.discovery
